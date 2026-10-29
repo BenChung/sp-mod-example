@@ -24,7 +24,7 @@ jobs:
       # Provenance embed. dist/ is the Workshop item content folder.
       - name: Attest mod folder
         id: attest
-        uses: BenChung/sp-mod-attestation@v1
+        uses: BenChung/sp-mod-attestation@v1.0.0
         with:
           path: dist
  
