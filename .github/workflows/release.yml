@@ -18,13 +18,14 @@ jobs:
           persist-credentials: false
  
       # --- modder-controlled build; anything goes here --------------------
+      - run: mkdir dist
       - run: cp README.md dist/
       # ----------------------------------------------------------------------
  
       # Provenance embed. dist/ is the Workshop item content folder.
       - name: Attest mod folder
         id: attest
-        uses: BenChung/sp-mod-attestation@v1.0.0
+        uses: BenChung/sp-mod-attestation@v1
         with:
           path: dist
  
