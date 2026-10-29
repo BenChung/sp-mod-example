@@ -18,26 +18,23 @@ jobs:
           persist-credentials: false
  
       # --- modder-controlled build; anything goes here --------------------
-      - run: mkdir dist
-      - run: cp README.md dist/
+      - run: mkdir my-mod
+      - run: cp README.md my-mod/
       # ----------------------------------------------------------------------
  
-      # Provenance embed. dist/ is the Workshop item content folder.
+      # Provenance embed. my-mod/ is the Workshop item content folder.
       - name: Attest mod folder
         id: attest
         uses: BenChung/sp-mod-attestation@v1.0.0
         with:
-          path: dist
- 
-      - uses: actions/upload-artifact@v4
-        with:
-          name: my-mod-dist
-          path: dist/
+          path: my-mod
  
       - name: Attach to GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          tar -czf my-mod-${GITHUB_REF_NAME}.tar.gz -C dist .
-          gh release create "$GITHUB_REF_NAME" --generate-notes || true
-          gh release upload "$GITHUB_REF_NAME" --clobber my-mod-${GITHUB_REF_NAME}.tar.gz
+          zip -r -X "my-mod-${GITHUB_REF_NAME}.zip" my-mod   # extracts to my-mod/...
+          if ! gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
+            gh release create "$GITHUB_REF_NAME" --generate-notes
+          fi
+          gh release upload "$GITHUB_REF_NAME" --clobber "my-mod-${GITHUB_REF_NAME}.zip"
