@@ -1,0 +1,42 @@
+name: Release mod
+ 
+on:
+  push:
+    tags: ["v*"]
+ 
+permissions:
+  contents: write      # for the release upload below
+  id-token: write      # required by attest-mod (Sigstore certificate)
+  attestations: write  # required by attest-mod (store attestation on GitHub)
+ 
+jobs:
+  build-and-attest:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+ 
+      # --- modder-controlled build; anything goes here --------------------
+      - run: cp README.md dist/
+      # ----------------------------------------------------------------------
+ 
+      # Provenance embed. dist/ is the Workshop item content folder.
+      - name: Attest mod folder
+        id: attest
+        uses: BenChung/sp-mod-attestation@v1
+        with:
+          path: dist
+ 
+      - uses: actions/upload-artifact@v4
+        with:
+          name: my-mod-dist
+          path: dist/
+ 
+      - name: Attach to GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          tar -czf my-mod-${GITHUB_REF_NAME}.tar.gz -C dist .
+          gh release create "$GITHUB_REF_NAME" --generate-notes || true
+          gh release upload "$GITHUB_REF_NAME" --clobber my-mod-${GITHUB_REF_NAME}.tar.gz
